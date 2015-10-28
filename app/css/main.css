@@ -59,7 +59,7 @@
     left: -1.85714em; }
 
 .fa-border {
-  padding: 0.2em 0.25em 0.15em;
+  padding: .2em .25em .15em;
   border: solid 0.08em #eee;
   border-radius: .1em; }
 
@@ -2019,6 +2019,27 @@
   content: ""; }
 
 body {
-  background: #e2ebf3; }
+  background: #e2ebf3;
+  margin: 0;
+  padding: 0; }
+
+.container {
+  height: 500px;
+  width: 350px;
+  border: 2px solid yellow;
+  margin-left: 30%;
+  margin-right: 20%;
+  text-align: center;
+  border-radius: 30px;
+  list-style-type: none; }
+
+#peeps {
+  height: 60px;
+  width: 100%;
+  background-color: green;
+  margin: 0;
+  padding-top: 14px;
+  border-radius: 30px;
+  color: purple; }
 
 /*# sourceMappingURL=main.css.map */
