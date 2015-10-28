@@ -2,16 +2,14 @@ import Backbone from 'backbone';
 import $ from 'jquery';
 import MentorsCollection from './mentors_collection';
 //import MentorsCollection from './MentorsCollection';
-import mentorTemplate from './views/mentor';
-import mentorsTemplate from './views/mentors';
-
-
+import mentorTemplate from './mentor';
+import mentorsTemplate from './mentors';
 
 let Router = Backbone.Router.extend({
 
   routes: {
     "" : "showMentors",
-    "mentors" : "showMentor",
+    "mentors" : "showMentors",
     "mentors/:id" : "showMentor"
 
   },
@@ -19,35 +17,35 @@ let Router = Backbone.Router.extend({
   initialize: function(appElement) {
     this.$el = appElement;
     //$.el  this is a jquery element. el refers to appElement
+    //this is where html stuff enters: function(appElement, x, y, z...) {}
 
     this.mentors = new MentorsCollection();
 
     let router = this;
 
-    this.$el.addEventListener('click', '.mentor-list-item', function(event) {
+    this.$el.on('click', '.mentor-list-item', function(event) {
       let $li = $(event.currentTarget);
       var mentorId = $li.data('mentor-id');
 
       router.navigate(`mentor/${mentor-id}`);
       //router will set the hash number in url now
-      router.showSpecificMentor(mentorId); 
-
+      router.showMentor(mentorId); 
 
       console.log('show mentorId', mentorId);
 
   });
 },
 
-  showSpecificMentor: function(mentorId) {
+  showMentor: function(mentorId) {
   let mentor = this.mentors.get(mentorId);
 
   if (mentor) {
   this.$el.html( mentorTemplate(mentor.toJSON()) );
   } else {
+    let router = this;
     mentor = this.mentors.add({objectId: mentorId});
-    this.showSpinner();
+    //this.showSpinner();
     mentor.fetch().then(function() {
-      let router = this;
       router.$el.html( mentorTemplate(mentor.toJSON()) );
 
     });

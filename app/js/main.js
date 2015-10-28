@@ -17,7 +17,7 @@ _jquery2['default'].ajaxSetup({
   }
 });
 
-},{"jquery":7}],2:[function(require,module,exports){
+},{"jquery":9}],2:[function(require,module,exports){
 'use strict';
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -44,16 +44,40 @@ var _mentors_collection = require('./mentors_collection');
 
 var _mentors_collection2 = _interopRequireDefault(_mentors_collection);
 
-window.MentorsCollection = _mentors_collection2['default'];
+//window.MentorsCollection = MentorsCollection;
 
 var appElement = (0, _jquery2['default'])('.app');
 //pass appElement as an argument to router
 var router = new _router2['default'](appElement);
+//this is where html elements pass Router(appElement, x, y, z,..)
 router.start();
+
+window.router = router;
 
 console.log('Hello, World');
 
-},{"./ajax_setup":1,"./mentors_collection":4,"./router":5,"jquery":7,"moment":8,"underscore":9}],3:[function(require,module,exports){
+},{"./ajax_setup":1,"./mentors_collection":6,"./router":7,"jquery":9,"moment":10,"underscore":11}],3:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _moment = require('moment');
+
+var _moment2 = _interopRequireDefault(_moment);
+
+function mentorTemplate(data) {
+
+  return '\n    <h2>' + data.Name + '</h2>\n    ';
+}
+
+exports['default'] = mentorTemplate;
+module.exports = exports['default'];
+
+},{"moment":10}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -75,7 +99,26 @@ var MentorModel = _backbone2['default'].Model.extend({
 exports['default'] = MentorModel;
 module.exports = exports['default'];
 
-},{"backbone":6}],4:[function(require,module,exports){
+},{"backbone":8}],5:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+function processData(data) {
+  return data.map(function (item) {
+    return '\n    <li class=\'mentor list item\' data-mentor-id="' + item.objectId + '">' + item.Name + '</li>\n    <li class=\'mentor list item\' data-mentor-id="' + item.objectId + '">' + item.Email + '</li>\n    <li class=\'mentor list item\' data-mentor-id="' + item.objectId + '">' + item.Phone + '</li>\n    <li class=\'mentor list item\' data-mentor-id="' + item.objectId + '">' + item.Location + '</li>';
+  }).join('');
+}
+
+function mentorsTemplate(data) {
+  return '\n      <h2>Something Mentor</h2>\n      <ul>' + processData(data) + '</ul>\n      ';
+}
+
+exports['default'] = mentorsTemplate;
+module.exports = exports['default'];
+
+},{}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -93,9 +136,10 @@ var _mentor_model = require('./mentor_model');
 var _mentor_model2 = _interopRequireDefault(_mentor_model);
 
 var MentorsCollection = _backbone2['default'].Collection.extend({
+
   url: 'https://api.parse.com/1/classes/backbonerouter19',
 
-  //model: MentorModel,
+  model: _mentor_model2['default'],
 
   parse: function parse(data) {
     return data.results;
@@ -105,7 +149,7 @@ var MentorsCollection = _backbone2['default'].Collection.extend({
 exports['default'] = MentorsCollection;
 module.exports = exports['default'];
 
-},{"./mentor_model":3,"backbone":6}],5:[function(require,module,exports){
+},{"./mentor_model":4,"backbone":8}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -127,14 +171,20 @@ var _mentors_collection = require('./mentors_collection');
 var _mentors_collection2 = _interopRequireDefault(_mentors_collection);
 
 //import MentorsCollection from './MentorsCollection';
-//import mentorTemplate from './views/mentor';
-//import mentorsTemplate from './views/mentors';
+
+var _mentor = require('./mentor');
+
+var _mentor2 = _interopRequireDefault(_mentor);
+
+var _mentors = require('./mentors');
+
+var _mentors2 = _interopRequireDefault(_mentors);
 
 var Router = _backbone2['default'].Router.extend({
 
   routes: {
     "": "showMentors",
-    "mentors": "showMentor",
+    "mentors": "showMentors",
     "mentors/:id": "showMentor"
 
   },
@@ -142,41 +192,46 @@ var Router = _backbone2['default'].Router.extend({
   initialize: function initialize(appElement) {
     this.$el = appElement;
     //$.el  this is a jquery element. el refers to appElement
+    //this is where html stuff enters: function(appElement, x, y, z...) {}
 
     this.mentors = new _mentors_collection2['default']();
 
     var router = this;
 
-    this.$el.addEventListener('click', '.mentor-list-item', function (event) {
+    this.$el.on('click', '.mentor-list-item', function (event) {
       var $li = (0, _jquery2['default'])(event.currentTarget);
       var mentorId = $li.data('mentor-id');
 
       router.navigate('mentor/' + (mentor - id));
       //router will set the hash number in url now
-      router.showSpecificMentor(mentorId);
+      router.showMentor(mentorId);
 
       console.log('show mentorId', mentorId);
     });
   },
 
-  showSpecificMentor: function showSpecificMentor(mentorId) {
+  showMentor: function showMentor(mentorId) {
+    var _this = this;
+
     var mentor = this.mentors.get(mentorId);
 
     if (mentor) {
-      this.$el.html(mentorTemplate(mentor.toJSON()));
+      this.$el.html((0, _mentor2['default'])(mentor.toJSON()));
     } else {
-      mentor = this.mentors.add({ objectId: mentorId });
-      this.showSpinner();
-      mentor.fetch().then(function () {
-        var router = this;
-        router.$el.html(mentorTemplate(mentor.toJSON()));
-      });
+      (function () {
+        var router = _this;
+        mentor = _this.mentors.add({ objectId: mentorId });
+        //this.showSpinner();
+        mentor.fetch().then(function () {
+          router.$el.html((0, _mentor2['default'])(mentor.toJSON()));
+        });
+      })();
     }
   },
 
   showMentors: function showMentors(mentorId) {
     this.mentors.fetch().then((function () {
-      this.$el.html(mentorsTemplate(this.mentors.toJSON()));
+      this.$el.html((0, _mentors2['default'])(this.mentors.toJSON()));
     }).bind(this));
   },
 
@@ -225,7 +280,7 @@ exports['default'] = Router;
 // export default Router;
 module.exports = exports['default'];
 
-},{"./mentors_collection":4,"backbone":6,"jquery":7}],6:[function(require,module,exports){
+},{"./mentor":3,"./mentors":5,"./mentors_collection":6,"backbone":8,"jquery":9}],8:[function(require,module,exports){
 (function (global){
 //     Backbone.js 1.2.3
 
@@ -2124,7 +2179,7 @@ module.exports = exports['default'];
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"jquery":7,"underscore":9}],7:[function(require,module,exports){
+},{"jquery":9,"underscore":11}],9:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.4
  * http://jquery.com/
@@ -11336,7 +11391,7 @@ return jQuery;
 
 }));
 
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 //! moment.js
 //! version : 2.10.6
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
@@ -14532,7 +14587,7 @@ return jQuery;
     return _moment;
 
 }));
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
